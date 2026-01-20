@@ -1,0 +1,61 @@
+let roleFiller = {
+
+    run: function(creep) {
+        if(creep.memory.filling && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.memory.filling = false;
+        }
+        if(!creep.memory.filling && creep.store.getFreeCapacity() == 0) {
+            creep.memory.filling = true;
+        }
+        
+        if(creep.memory.filling){
+            let target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_LAB) &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                }
+            });
+            if(target){
+                if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }else{
+                target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_TOWER) && (structure.store.getFreeCapacity(RESOURCE_ENERGY) > 300);
+                    }
+                });
+                
+                if(target) {
+                    if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                    }
+                }else{
+                    let terminal = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType == STRUCTURE_TERMINAL && structure.store[RESOURCE_ENERGY] < 50000);
+                        }
+                    });
+                    if(terminal){
+                        if(creep.transfer(terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+                            creep.moveTo(terminal, {visualizePathStyle: {stroke: '#ffffff'}});
+                        }
+                    }else{
+                        creep.moveTo(37, 24);
+                    }
+                }
+            }
+        }else{
+            let sources = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_STORAGE);
+                }
+            });
+            if(creep.withdraw(sources, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources, {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+        }
+    }
+};
+
+module.exports = roleFiller;

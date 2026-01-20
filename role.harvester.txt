@@ -1,0 +1,33 @@
+let roleHarvester = {
+
+    run: function(creep, sources, resourcesMy) {
+        if(creep.memory.transfering && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.memory.transfering = false;
+        }
+        if(!creep.memory.transfering && creep.store.getFreeCapacity() == 0) {
+            creep.memory.transfering = true;
+        }
+        
+        if(creep.memory.transfering){
+            let target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
+                        (structure.store.getFreeCapacity() > 0);
+                }
+            });
+            if(target) {
+                for(let resource of resourcesMy){
+                    if(creep.transfer(target, resource) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                    }
+                }
+            }
+        }else{
+            if(creep.harvest(sources) == ERR_NOT_IN_RANGE || creep.harvest(sources) == ERR_NOT_ENOUGH_RESOURCES) {
+                creep.moveTo(sources, {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+        }
+    }
+};
+
+module.exports = roleHarvester;

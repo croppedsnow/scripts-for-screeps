@@ -1,0 +1,97 @@
+let roleTransporter = {
+
+    run: function(creep, resourcesMy){
+        
+        function amountRes(target){
+            let amountResources = 0;
+            for(let resource of resourcesMy){
+                if(!(target.store[resource] === undefined)){
+                    amountResources += target.store[resource];
+                }
+            }
+            return amountResources;
+        }
+        
+        let amountCreep = amountRes(creep);
+        if(creep.memory.transporting && amountCreep == 0) {
+            creep.memory.transporting = false;
+        }
+        if(!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
+            creep.memory.transporting = true;
+        }
+        
+        if(creep.memory.transporting){
+            let terminal = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return(structure.structureType == STRUCTURE_TERMINAL && structure.store[RESOURCE_OXYGEN] < 30000);
+                }
+            });
+            if(terminal && (creep.store[RESOURCE_OXYGEN] > 0)){
+                if(creep.transfer(terminal, RESOURCE_OXYGEN) == ERR_NOT_IN_RANGE){
+                    creep.moveTo(terminal, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }else{
+                let target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_STORAGE);
+                    }
+                });
+                if(target.store.getFreeCapacity() > 0){
+                    for(let resource of resourcesMy){
+                        if(creep.transfer(target, resource) == ERR_NOT_IN_RANGE && creep.transfer(target, resource) != ERR_NOT_ENOUGH_RESOURCES) {
+                            creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                        }
+                    }
+                }
+            }
+        }else{
+            let container = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    let amountResources = 0;
+                    if(structure.structureType == STRUCTURE_CONTAINER){
+                        amountResources = amountRes(structure);
+                    }
+                    return (structure.structureType == STRUCTURE_CONTAINER) && (amountResources >= creep.store.getCapacity());
+                }
+            });
+            
+            if(container){
+                for(let resource of resourcesMy){
+                    if(creep.withdraw(container, resource) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(container, {visualizePathStyle: {stroke: '#ffaa00'}});
+                    }else{
+                        if(creep.withdraw(container, resource) != ERR_NOT_ENOUGH_RESOURCES){
+                            break;
+                        }
+                    }   
+                }
+            }else{
+                container = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        let amountResources = 0;
+                        if(structure.structureType == STRUCTURE_CONTAINER){
+                            amountResources = amountRes(structure);
+                        }
+                        return (structure.structureType == STRUCTURE_CONTAINER) && (amountResources > 0);
+                    }
+                });
+                
+                if(container){
+                    for(let resource of resourcesMy){
+                        if(creep.withdraw(container, resource) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(container, {visualizePathStyle: {stroke: '#ffaa00'}});
+                        }else{
+                            if(creep.withdraw(container, resource) != ERR_NOT_ENOUGH_RESOURCES){
+                                break;
+                            }
+                        }   
+                    }
+                }else{
+                    creep.moveTo(37, 24);
+                }
+            }
+        }
+	}
+};
+
+module.exports = roleTransporter;

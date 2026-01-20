@@ -1,0 +1,20 @@
+let roleClaimer = {
+
+    run: function(creep, flag) {
+        if(flag.room !== undefined){
+            if(creep.claimController(flag.room.controller) == ERR_INVALID_TARGET){
+                if(creep.attackController(flag.room.controller) == ERR_NOT_IN_RANGE){
+                    creep.moveTo(flag.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }else{
+                if(creep.claimController(flag.room.controller) == ERR_NOT_IN_RANGE){
+                    creep.moveTo(flag.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }else{
+            creep.moveTo(flag, {visualizePathStyle: {stroke: '#ffffff'}})
+        }
+	}
+};
+
+module.exports = roleClaimer;

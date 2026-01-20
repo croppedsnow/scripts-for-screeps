@@ -1,0 +1,69 @@
+let roleScavenger = {
+
+    run: function(creep, resourcesScavenging){
+        if(_.isEqual(creep.room, Game.spawns[creep.memory.spawn].room)){
+            if(!creep.memory.scavenging && creep.store.getFreeCapacity() == creep.store.getCapacity()) {
+                creep.memory.scavenging = true;
+            }
+            if(creep.memory.scavenging && creep.store.getFreeCapacity() == 0) {
+                creep.memory.scavenging = false;
+            }
+            
+            if(!creep.memory.scavenging){
+                let target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_STORAGE);
+                    }
+                });
+                
+                if(target.store.getFreeCapacity(resourcesScavenging) > 0){
+                    for(let resource of resourcesScavenging){
+                        if(creep.transfer(target, resource) == ERR_NOT_IN_RANGE && creep.transfer(target, resource) != ERR_NOT_ENOUGH_RESOURCES) {
+                            creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                        }
+                    }
+                }else{
+                    creep.moveTo(37, 24);
+                }
+            }else{
+                let droppedResource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
+                    filter: (resources) => {
+                        return resources.amount > creep.room.findPath(creep.pos, resources.pos).length;
+                    }
+                });
+                
+                if(droppedResource){
+                    if(creep.pickup(droppedResource) == ERR_NOT_IN_RANGE){
+                        creep.moveTo(droppedResource, {visualizePathStyle: {stroke: '#ffffff'}});
+                    }
+                }else{
+                    let tombstones = creep.pos.findClosestByRange(FIND_TOMBSTONES, {
+                        filter: (tombstone) => {
+                            let amountResources = 0;
+                            for(let resource of resourcesScavenging){
+                                if(!(tombstone.store[resource] === undefined)){
+                                    amountResources += tombstone.store[resource];
+                                }
+                            }
+                            return (amountResources > 0);
+                        }
+                    });
+                    if(tombstones){
+                        for(let resource of resourcesScavenging){
+                            if(creep.withdraw(tombstones, resource) == ERR_NOT_IN_RANGE && creep.withdraw(tombstones, resource) != ERR_NOT_ENOUGH_RESOURCES) {
+                                creep.moveTo(tombstones, {visualizePathStyle: {stroke: '#ffffff'}});
+                            }
+                        }
+                    }else{
+                        creep.memory.scavenging = false;
+                        creep.moveTo(37, 24);
+                    }
+                }
+            }
+        }else{
+            creep.moveTo(Game.spawns[creep.memory.spawn]);
+        }
+	}
+};
+
+module.exports = roleScavenger;

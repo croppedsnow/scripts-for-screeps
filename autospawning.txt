@@ -1,0 +1,113 @@
+let autoSpawning = {
+    run: function(spawnName, countHarvesters, countUpgraders, countBuilders, countRepairers, countTransporters, countFillers, countDestroyers,
+        countScavengers, countAttackers, countClaimers, countHealers, countTransRooms, countTanks){
+            
+        let buildingHarvesters = buildingUpgraders = buildingBuilders = buildingRepairers = buildingTransporters = buildingFillers = buildingDestroyers = 
+        buildingScavengers = buildingTransRooms = buildingAttackers = buildingHealers = buildingTanks = buildingClaimers = [];
+            
+        if(Game.spawns[spawnName].room.controller.level >= 4){    
+            buildingHarvesters = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+            buildingUpgraders = [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            buildingBuilders = [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        }else{
+            buildingHarvesters = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            buildingUpgraders = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            buildingBuilders = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+        }    
+            
+        buildingRepairers = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingTransporters = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingFillers = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingDestroyers = [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingScavengers = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingTransRooms = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingAttackers = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE,
+                                    MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, MOVE];
+        buildingHealers = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE,
+                                    MOVE, MOVE, MOVE, MOVE, HEAL, HEAL, HEAL, HEAL];
+        buildingTanks = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                                TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        buildingClaimers = [CLAIM, CLAIM, MOVE, MOVE];
+        
+        let claimers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'claimer' && creep.memory.spawn == spawnName));
+        if(claimers.length < countClaimers){
+            let newName = Game.spawns[spawnName].room.name + '_Claimer_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingClaimers, newName, {memory: {role: 'claimer', spawn: spawnName}});
+        }
+        
+        let transportersRooms = _.filter(Game.creeps, (creep) => (creep.memory.role == 'transporterRooms' && creep.memory.spawn == spawnName));
+        if(transportersRooms.length < countTransRooms){
+            let newName = Game.spawns[spawnName].room.name + '_TransporterRooms_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingTransRooms, newName, {memory: {role: 'transporterRooms', spawn: spawnName}});
+        }
+        
+        let healers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'healer' && creep.memory.spawn == spawnName));
+        if(healers.length < countHealers){
+            let newName = Game.spawns[spawnName].room.name + '_Healer_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingHealers, newName, {memory: {role: 'healer', spawn: spawnName}});
+        }
+        
+        let attackers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'attacker' && creep.memory.spawn == spawnName));
+        if(attackers.length < countAttackers){
+            let newName = Game.spawns[spawnName].room.name + '_Attacker_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingAttackers, newName, {memory: {role: 'attacker', spawn: spawnName}});
+        }
+        
+        let tanks = _.filter(Game.creeps, (creep) => (creep.memory.role == 'tank' && creep.memory.spawn == spawnName));
+        if(tanks.length < countTanks){
+            let newName = Game.spawns[spawnName].room.name + '_Tank_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingTanks, newName, {memory: {role: 'tank', spawn: spawnName}});
+        }
+        
+        let scavengers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'scavenger' && creep.memory.spawn == spawnName));
+        if(scavengers.length < countScavengers){
+            let newName = Game.spawns[spawnName].room.name + '_Scavenger_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingScavengers, newName, {memory: {role: 'scavenger', spawn: spawnName}});
+        } 
+        
+        let destroyers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'destroyer' && creep.memory.spawn == spawnName));
+        if(destroyers.length < countDestroyers){
+            let newName = Game.spawns[spawnName].room.name + '_Destroyer_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingDestroyers, newName, {memory: {role: 'destroyer', spawn: spawnName}});
+        }
+        
+        let repairers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'repairer' && creep.memory.spawn == spawnName));
+        if(repairers.length < countRepairers){
+            let newName = Game.spawns[spawnName].room.name + '_Repairer_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingRepairers, newName, {memory: {role: 'repairer', spawn: spawnName}});
+        }
+    
+        let builders = _.filter(Game.creeps, (creep) => (creep.memory.role == 'builder' && creep.memory.spawn == spawnName));
+        if(builders.length < countBuilders){
+            let newName = Game.spawns[spawnName].room.name + '_Builder_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingBuilders, newName, {memory: {role: 'builder', spawn: spawnName}});
+        }
+        
+        let upgraders = _.filter(Game.creeps, (creep) => (creep.memory.role == 'upgrader' && creep.memory.spawn == spawnName));
+        if(upgraders.length < countUpgraders){
+            let newName = Game.spawns[spawnName].room.name + '_Upgrader_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingUpgraders, newName, {memory: {role: 'upgrader', spawn: spawnName}});
+        }
+        
+        let fillers = _.filter(Game.creeps, (creep) => (creep.memory.role == 'filler' && creep.memory.spawn == spawnName));
+        if(fillers.length < countFillers){
+            let newName = Game.spawns[spawnName].room.name + '_Filler_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingFillers, newName, {memory: {role: 'filler', spawn: spawnName}});
+        }
+        
+        let transporters = _.filter(Game.creeps, (creep) => (creep.memory.role == 'transporter' && creep.memory.spawn == spawnName));
+        if(transporters.length < countTransporters){
+            let newName = Game.spawns[spawnName].room.name + '_Transporter_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingTransporters, newName, {memory: {role: 'transporter', spawn: spawnName}});
+        }
+        
+        let harvesters = _.filter(Game.creeps, (creep) => (creep.memory.role == 'harvester' && creep.memory.spawn == spawnName));
+        if(harvesters.length < countHarvesters){
+            let newName = Game.spawns[spawnName].room.name + '_Harvester_' + Game.time;
+            Game.spawns[spawnName].spawnCreep(buildingHarvesters, newName, {memory: {role: 'harvester', minerals: false, spawn: spawnName}});
+        }
+    }    
+}
+
+module.exports = autoSpawning;

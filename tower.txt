@@ -1,0 +1,58 @@
+let towerAI = {
+    run: function(tower, destroyingStruc){
+        let closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        
+        if(closestHostile){
+            let closestHostileHeal = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                filter: (creep) => {
+                    var includingHeal = false;
+                    for(var part of creep.body){
+                        if(part.type == HEAL){
+                            includingHeal = true;
+                            break;
+                        }
+                    }
+                    return(includingHeal);
+                }
+            });
+            if(closestHostileHeal){
+                tower.attack(closestHostileHeal);
+            }else{
+                tower.attack(closestHostile);
+            }
+        }else{
+            let closestDamagedStruc = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => ((structure.hits < structure.hitsMax) && (structure.structureType == STRUCTURE_WALL) && (structure.hits < 400000) 
+                && !destroyingStruc.includes(structure.id))
+            });
+            if(closestDamagedStruc){
+                tower.repair(closestDamagedStruc);
+            }
+            
+            closestDamagedStruc = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => ((structure.hitsMax - structure.hits > 800) && (structure.structureType == STRUCTURE_RAMPART) && (structure.hits < 1300000)
+                && !destroyingStruc.includes(structure.id))
+            });
+            if(closestDamagedStruc){
+                tower.repair(closestDamagedStruc);
+            }
+            
+            closestDamagedStruc = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => ((structure.hits < structure.hitsMax) && (structure.structureType == STRUCTURE_WALL) && (structure.hits < 10000)
+                && !destroyingStruc.includes(structure.id))
+            });
+            if(closestDamagedStruc){
+                tower.repair(closestDamagedStruc);
+            }
+            
+            closestDamagedStruc = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => ((structure.hitsMax - structure.hits > 800) && (structure.structureType == STRUCTURE_RAMPART) && (structure.hits < 100000)
+                && !destroyingStruc.includes(structure.id))
+            });
+            if(closestDamagedStruc){
+                tower.repair(closestDamagedStruc);
+            }
+        }
+    }
+}
+module.exports = towerAI;

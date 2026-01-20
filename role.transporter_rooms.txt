@@ -1,0 +1,32 @@
+let roleTransporterRooms = {
+
+    run: function(creep, resource, transTo, transOut){
+        
+        if(creep.memory.transporting && creep.store[resource] == 0) {
+            creep.memory.transporting = false;
+        }
+        if(!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
+            creep.memory.transporting = true;
+        }
+        
+        if(creep.memory.transporting){
+            if(transTo.store.getFreeCapacity() > 0){
+                if(creep.transfer(transTo, resource) == ERR_NOT_IN_RANGE){
+                    creep.moveTo(transTo, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }else{
+                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }else{
+            if(transOut){
+                if(creep.withdraw(transOut, resource) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(transOut, {visualizePathStyle: {stroke: '#ffaa00'}});
+                }
+            }
+        }
+	}
+};
+
+module.exports = roleTransporterRooms;

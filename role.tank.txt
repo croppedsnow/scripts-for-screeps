@@ -1,0 +1,18 @@
+let roleTank = {
+
+    run: function(creep) {
+        let flagsVisited = 0;
+        for(let flag in Game.flags){
+            if(!creep.memory[flag]){
+                if(Game.flags[flag].pos.isEqualTo(creep.pos)){
+                    creep.memory[flag] = true;
+                }else{
+                    creep.moveTo(Game.flags[flag], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+                break;
+            }
+        }
+	}
+};
+
+module.exports = roleTank;

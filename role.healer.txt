@@ -1,0 +1,28 @@
+let roleHealer = {
+
+    run: function(creep) {
+        let closestDamagedCreep = _.filter(Game.creeps, (creepAll) => (((creepAll.memory.role == 'healer') || (creepAll.memory.role == 'attacker')) && (creepAll.hits < creepAll.hitsMax)));
+        if(closestDamagedCreep.length > 0){
+            if(creep.heal(closestDamagedCreep[0]) == ERR_NOT_IN_RANGE){
+                creep.moveTo(closestDamagedCreep[0].pos, {visualizePathStyle: {stroke: '#ffffff'}});
+            }
+        }else{
+            let closestAttacker = _.filter(Game.creeps, (creepAll) => (creepAll.memory.role == 'attacker'));
+            if(closestAttacker.length > 0){
+                creep.moveTo(closestAttacker[0].pos, {visualizePathStyle: {stroke: '#ffffff'}});
+            }else{
+                closestDamagedCreep = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
+                    filter: (creepAll) =>
+                    (creepAll.hits < creepAll.hitsMax)
+                });
+                if(closestDamagedCreep){
+                    if(creep.heal(closestDamagedCreep) == ERR_NOT_IN_RANGE){
+                        creep.moveTo(closestDamagedCreep.pos, {visualizePathStyle: {stroke: "#ffffff"}});
+                    }
+                }
+            }
+        }
+	}
+};
+
+module.exports = roleHealer;

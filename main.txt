@@ -1,0 +1,143 @@
+let roleHarvester = require('role.harvester');
+let roleUpgrader = require('role.upgrader');
+let roleBuilder = require('role.builder');
+let roleRepairer = require('role.repairer');
+let roleTransporter = require('role.transporter');
+let roleFiller = require('role.filler');
+let roleDestroyer = require('role.destroyer');
+let roleScavenger = require('role.scavenger');
+let roleAttacker = require('role.attacker');
+let roleClaimer = require('role.claimer');
+let roleHealer = require('role.healer');
+let roleTransporterRooms = require('role.transporter_rooms');
+let roleTank = require('role.tank');
+
+let autoSpawning = require('autospawning');
+
+let towerAI = require('tower');
+let linksAI = require('links');
+
+module.exports.loop = function () {
+    
+    for(let name in Memory.creeps){
+        if(!Game.creeps[name]){
+            delete Memory.creeps[name];
+            console.log('Memory dead creeps was deleted');
+        }
+    }
+    
+    autoSpawning.run('Spawn1', 2, 2, 0, 1, 2, 2, 1, 1, 0, 0, 0, 0, 0);
+    autoSpawning.run('Spawn2', 2, 3, 0, 1, 2, 2, 1, 1, 0, 0, 0, 1, 0);
+    
+    let destroyingStruc = ['65d733f6808f439d95829ecd', '65d733f34ce83cd1968105df', '65d733f9149f955006b5bc78'];
+    
+    
+    let resourcesScavenging = [RESOURCE_ZYNTHIUM_HYDRIDE, RESOURCE_UTRIUM_HYDRIDE, RESOURCE_KEANIUM_OXIDE, RESOURCE_LEMERGIUM_OXIDE, RESOURCE_GHODIUM_OXIDE, 
+    RESOURCE_ENERGY, RESOURCE_OXYGEN, RESOURCE_ZYNTHIUM];
+    let resourcesMy = [RESOURCE_ENERGY, RESOURCE_OXYGEN, RESOURCE_ZYNTHIUM];
+    
+    for(let room in Game.rooms){
+        let towers = Game.rooms[room].find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return structure.structureType == STRUCTURE_TOWER;
+            }
+        });
+        for(let tower of towers){
+            towerAI.run(tower, destroyingStruc);
+        }
+    }
+    
+    linksAI.run();
+    
+    for(let name in Game.creeps) {
+        let creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            let sourceHarvester = creep.room.find(FIND_SOURCES);
+            let mineralHarvester = creep.room.find(FIND_MINERALS);
+            if(!creep.memory.minerals){
+                if(creep.memory.numberSource === undefined){
+                    let harvesterSources = [];
+                    for(var source of sourceHarvester){
+                        harvesterSources.push(_.filter(Game.creeps, (creepAll) => (creepAll.memory.numberSource == harvesterSources.length && _.isEqual(creepAll.room, creep.room))));
+                        if(harvesterSources[harvesterSources.length - 1].length < 1){
+                            creep.memory.numberSource = harvesterSources.length - 1;
+                            break;
+                        }
+                    }
+                    if(creep.memory.numberSource === undefined){
+                        creep.memory.minerals = true;
+                        roleHarvester.run(creep, mineralHarvester[0], resourcesMy);
+                    }else{
+                        roleHarvester.run(creep, sourceHarvester[creep.memory.numberSource], resourcesMy);
+                    }
+                }else{
+                    roleHarvester.run(creep, sourceHarvester[creep.memory.numberSource], resourcesMy);
+                }
+            }else{
+                roleHarvester.run(creep, mineralHarvester[0], resourcesMy);
+            }
+        }
+        
+        if(creep.memory.role == 'transporter'){
+            roleTransporter.run(creep, resourcesMy);
+        }
+        
+        if(creep.memory.role == 'filler'){
+            roleFiller.run(creep);
+        }
+        
+        if(creep.memory.role == 'upgrader'){
+            roleUpgrader.run(creep, false, creep.room);
+        }
+        
+        if(creep.memory.role == 'builder'){
+            roleBuilder.run(creep, false, creep.room);
+        }
+        
+        if(creep.memory.role == 'repairer'){
+            roleRepairer.run(creep, false, creep.room, destroyingStruc);
+        }
+        
+        if(creep.memory.role == 'destroyer'){
+            let upgrading = true;
+            for(let ID of destroyingStruc){
+                if(Game.getObjectById(ID)){
+                    roleDestroyer.run(creep, ID);
+                    upgrading = false;
+                    break;
+                }
+            }
+            if(upgrading){
+                roleUpgrader.run(creep);
+            }
+        }
+        
+        if(creep.memory.role == 'scavenger'){
+            roleScavenger.run(creep, resourcesScavenging);
+        }
+        
+        if(creep.memory.role == 'attacker'){
+            roleAttacker.run(creep);
+        }
+        
+        if(creep.memory.role == 'claimer'){
+            roleClaimer.run(creep, Game.flags['Flag1']);
+        }
+        
+        if(creep.memory.role == 'healer'){
+            roleHealer.run(creep);
+        }
+        
+        if(creep.memory.role == 'tank'){
+            roleTank.run(creep);
+        }
+        
+        if(creep.memory.role == 'transporterRooms'){
+            roleTransporterRooms.run(creep, RESOURCE_ENERGY, Game.getObjectById('6690e0debdc56459e0b7c113'), Game.getObjectById('669cca5740fd5d836736a0a0'));
+        }
+        
+        //console.log(creep.memory.role);
+        //console.log(Game.cpu.getUsed());
+        
+    }
+}
